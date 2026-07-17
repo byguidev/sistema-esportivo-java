@@ -1,5 +1,7 @@
 package br.edu.ifba.saj.ads.poo.business;
 
+// testes de unidade para o serviço de atividades esportivas
+
 import br.edu.ifba.saj.ads.poo.data.RepositorioAtividades;
 import br.edu.ifba.saj.ads.poo.model.Atleta;
 import br.edu.ifba.saj.ads.poo.model.Competicao;
@@ -12,8 +14,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+// cobre as regras principais do serviço: vaga disponível, limite e unicidade de inscrição
 class ServicoAtividadesEsportivasTest {
 
+    // dependências recriadas antes de cada teste para isolar o estado
     private RepositorioAtividades repositorio;
     private ServicoAtividadesEsportivas servico;
 
@@ -23,6 +27,7 @@ class ServicoAtividadesEsportivasTest {
         servico = new ServicoAtividadesEsportivas(repositorio);
     }
 
+    // cenário feliz: uma inscrição válida em competição com vagas
     @Test
     void devePermitirInscricaoQuandoHaVagaEAtletaAindaNaoInscrito() throws Exception {
         Competicao competicao = new Competicao("Corrida", LocalDate.now().plusDays(10), 2);
@@ -37,6 +42,7 @@ class ServicoAtividadesEsportivasTest {
         assertEquals(atleta.getId(), repositorio.listarInscricoes().get(0).getAtleta().getId());
     }
 
+    // regra de limite: a segunda inscrição em competição de 1 vaga deve falhar
     @Test
     void deveFalharAoInscreverQuandoCompeticaoEstiverCompleta() throws Exception {
         Competicao competicao = new Competicao("Nado", LocalDate.now().plusDays(10), 1);
@@ -55,6 +61,7 @@ class ServicoAtividadesEsportivasTest {
         assertEquals(1, repositorio.listarInscricoes().size());
     }
 
+    // regra de unicidade: o mesmo atleta não pode se inscrever duas vezes
     @Test
     void deveFalharAoInscreverMesmoAtletaDuasVezesNaMesmaCompeticao() throws Exception {
         Competicao competicao = new Competicao("Judo", LocalDate.now().plusDays(10), 2);
