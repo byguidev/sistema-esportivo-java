@@ -26,61 +26,73 @@ mvn javafx:run
 
 ## Estrutura das camadas
 
-- `controller`: camada de apresentação JavaFX.
+- `presentation`: camada de apresentação JavaFX.
 - `business`: regras de negócio e validações.
 - `data`: repositório em memória.
 - `model`: entidades do domínio.
 
 ## Diagrama de classes
 
+> As quatro entidades formam um ciclo (Atleta → Inscrição → Competição → Resultado → Atleta); por isso as classes abaixo são declaradas nessa mesma ordem, o que evita cruzamento de linhas no layout automático do Mermaid.
+
 ```mermaid
 classDiagram
-    class Atleta {
-        +long id
-        +String nome
-        +String categoria
-    }
+    direction LR
 
-    class Competicao {
-        +long id
-        +String nome
-        +LocalDate data
-        +int limiteParticipantes
+    class Atleta {
+        <<entity>>
+        -long id
+        -String nome
+        -String categoria
     }
 
     class Inscricao {
-        +long id
-        +Atleta atleta
-        +Competicao competicao
+        <<entity>>
+        -long id
+        -Atleta atleta
+        -Competicao competicao
+    }
+
+    class Competicao {
+        <<entity>>
+        -long id
+        -String nome
+        -LocalDate data
+        -int limiteParticipantes
     }
 
     class Resultado {
-        +long id
-        +Competicao competicao
-        +Atleta primeiroLugar
-        +Atleta segundoLugar
-        +Atleta terceiroLugar
+        <<entity>>
+        -long id
+        -Competicao competicao
+        -Atleta primeiroLugar
+        -Atleta segundoLugar
+        -Atleta terceiroLugar
     }
 
     class ServicoAtividadesEsportivas {
-        +criarCompeticao()
-        +criarAtleta()
-        +criarInscricao()
-        +criarResultado()
+        <<business>>
+        +criarCompeticao(Competicao) void
+        +criarAtleta(Atleta) void
+        +criarInscricao(Inscricao) void
+        +criarResultado(Resultado) void
+        +validarLimiteParticipantes(Competicao) boolean
+        +validarInscricaoUnica(Competicao, Atleta) boolean
     }
 
     class RepositorioAtividades {
-        +salvarCompeticao()
-        +salvarAtleta()
-        +salvarInscricao()
-        +salvarResultado()
+        <<data>>
+        +salvarCompeticao(Competicao) void
+        +salvarAtleta(Atleta) void
+        +salvarInscricao(Inscricao) void
+        +salvarResultado(Resultado) void
     }
 
-    Atleta "1" <-- "0..*" Inscricao
-    Competicao "1" <-- "0..*" Inscricao
-    Competicao "1" <-- "0..*" Resultado
-    Atleta "1" <-- "0..*" Resultado
-    ServicoAtividadesEsportivas --> RepositorioAtividades
+    Atleta "1" -- "0..*" Inscricao : inscrições
+    Inscricao "0..*" -- "1" Competicao : competição
+    Competicao "1" -- "0..*" Resultado : resultados
+    Resultado "0..*" -- "1" Atleta : pódio
+    ServicoAtividadesEsportivas ..> RepositorioAtividades : usa
 ```
 
 ## Diagrama de sequência: cadastrar inscrição
