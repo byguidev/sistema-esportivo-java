@@ -1,4 +1,4 @@
-package br.edu.ifba.saj.ads.poo.controller;
+package br.edu.ifba.saj.ads.poo.presentation;
 
 // controller principal: tela inicial com tabelas e botões de ação
 

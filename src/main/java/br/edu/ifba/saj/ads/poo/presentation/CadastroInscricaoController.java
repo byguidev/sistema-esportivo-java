@@ -1,4 +1,4 @@
-package br.edu.ifba.saj.ads.poo.controller;
+package br.edu.ifba.saj.ads.poo.presentation;
 
 // controller da tela de inscrição de atletas em competições
 
