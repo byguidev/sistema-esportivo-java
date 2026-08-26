@@ -1,11 +1,7 @@
 package br.edu.ifba.saj.ads.poo.model;
 
 // classe que representa o resultado/pódio de uma competição
-public class Resultado {
-    // contador estático usado para gerar ids únicos
-    private static long contador = 0;
-    // identificador único do resultado
-    private long id;
+public class Resultado extends AbstractModel<Long> {
     // competição à qual o resultado se refere
     private Competicao competicao;
     // atleta que ficou em primeiro lugar
@@ -15,23 +11,13 @@ public class Resultado {
     // atleta que ficou em terceiro lugar
     private Atleta terceiroLugar;
 
-    // cria um resultado associando competição e os três colocados
+    // chama o construtor da superclasse e cria um resultado associando competição e os três colocados
     public Resultado(Competicao competicao, Atleta primeiroLugar, Atleta segundoLugar, Atleta terceiroLugar) {
-        this.id = ++contador;
+        super();
         this.competicao = competicao;
         this.primeiroLugar = primeiroLugar;
         this.segundoLugar = segundoLugar;
         this.terceiroLugar = terceiroLugar;
-    }
-
-    // retorna o id do resultado
-    public long getId() {
-        return id;
-    }
-
-    // redefine o id do resultado
-    public void setId(long id) {
-        this.id = id;
     }
 
     // retorna a competição do resultado
