@@ -1,31 +1,17 @@
 package br.edu.ifba.saj.ads.poo.model;
 
 // classe que representa um atleta inscrito em competições
-public class Atleta {
-    // contador estático para gerar ids únicos automaticamente
-    private static long contador = 0;
-    // identificador único do atleta
-    private long id;
+public class Atleta extends AbstractModel<Long> {
     // nome completo do atleta
     private String nome;
     // categoria em que o atleta compete (ex.: adulto, juvenil)
     private String categoria;
 
-    // construtor que cria um atleta gerando o id automaticamente
+    // construtor que cria um atleta e chama o construtor da superclasse
     public Atleta(String nome, String categoria) {
-        this.id = ++contador;
+        super();
         this.nome = nome;
         this.categoria = categoria;
-    }
-
-    // retorna o id do atleta
-    public long getId() {
-        return id;
-    }
-
-    // permite redefinir o id (uso em cenários de carga/restauro)
-    public void setId(long id) {
-        this.id = id;
     }
 
     // retorna o nome do atleta
