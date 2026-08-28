@@ -11,22 +11,12 @@ public class Competicao extends AbstractModel<Long> {
     // número máximo de atletas que podem se inscrever
     private int limiteParticipantes;
 
-    // cria uma nova competição com id gerado automaticamente
+    // cria uma nova competição e chama o construtor da superclasse
     public Competicao(String nome, LocalDate data, int limiteParticipantes) {
         super();
         this.nome = nome;
         this.data = data;
         this.limiteParticipantes = limiteParticipantes;
-    }
-
-    // retorna o id da competição
-    public long getId() {
-        return id;
-    }
-
-    // redefine o id da competição
-    public void setId(long id) {
-        this.id = id;
     }
 
     // retorna o nome da competição
