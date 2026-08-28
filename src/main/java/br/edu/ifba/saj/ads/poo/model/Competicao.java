@@ -3,11 +3,7 @@ package br.edu.ifba.saj.ads.poo.model;
 import java.time.LocalDate;
 
 // classe que representa uma competição esportiva cadastrada no sistema
-public class Competicao {
-    // contador estático usado para gerar ids únicos
-    private static long contador = 0;
-    // identificador único da competição
-    private long id;
+public class Competicao extends AbstractModel<Long> {
     // nome da competição
     private String nome;
     // data em que a competição será realizada
@@ -15,22 +11,12 @@ public class Competicao {
     // número máximo de atletas que podem se inscrever
     private int limiteParticipantes;
 
-    // cria uma nova competição com id gerado automaticamente
+    // cria uma nova competição e chama o construtor da superclasse
     public Competicao(String nome, LocalDate data, int limiteParticipantes) {
-        this.id = ++contador;
+        super();
         this.nome = nome;
         this.data = data;
         this.limiteParticipantes = limiteParticipantes;
-    }
-
-    // retorna o id da competição
-    public long getId() {
-        return id;
-    }
-
-    // redefine o id da competição
-    public void setId(long id) {
-        this.id = id;
     }
 
     // retorna o nome da competição
