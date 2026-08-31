@@ -10,7 +10,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<VBox maxHeight="-Infinity" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" prefHeight="572.0" prefWidth="644.0" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="br.edu.ifba.saj.ads.poo.presentation.MainController">
+<VBox maxHeight="-Infinity" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" prefHeight="780.0" prefWidth="644.0" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="br.edu.ifba.saj.ads.poo.presentation.MainController">
    <children>
       <HBox prefHeight="45.0" prefWidth="668.0">
          <children>
@@ -71,6 +71,25 @@
                   <TableColumn fx:id="colAtletaNome" prefWidth="360.0" style="-fx-font-weight: normal;" text="NOME" />
                   <TableColumn fx:id="colAtletaCategoria" prefWidth="240.0" style="-fx-font-weight: normal;" text="CATEGORIA" />
                   <TableColumn fx:id="colAtletaAcoes" prefWidth="120.0" style="-fx-font-weight: normal;" text="AÇÕES" />
+               </columns>
+               <columnResizePolicy>
+                  <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+               </columnResizePolicy>
+            </TableView>
+         </children>
+      </VBox>
+      <VBox prefHeight="237.0" prefWidth="600.0">
+         <children>
+            <Label alignment="CENTER" maxWidth="1.7976931348623157E308" prefHeight="50.0" prefWidth="708.0" text="INSCRIÇÕES REALIZADAS" VBox.vgrow="ALWAYS">
+               <font>
+                  <Font name="System Bold" size="16.0" />
+               </font>
+            </Label>
+            <TableView fx:id="tabelaInscricao" maxHeight="1.7976931348623157E308" prefHeight="200.0" prefWidth="700.0" VBox.vgrow="ALWAYS">
+               <columns>
+                  <TableColumn fx:id="colInscricaoAtleta" prefWidth="300.0" style="-fx-font-weight: normal;" text="ATLETA" />
+                  <TableColumn fx:id="colInscricaoCompeticao" prefWidth="300.0" style="-fx-font-weight: normal;" text="COMPETIÇÃO" />
+                  <TableColumn fx:id="colInscricaoAcoes" prefWidth="120.0" style="-fx-font-weight: normal;" text="AÇÕES" />
                </columns>
                <columnResizePolicy>
                   <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />

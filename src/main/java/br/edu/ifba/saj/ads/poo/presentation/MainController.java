@@ -1,9 +1,9 @@
 package br.edu.ifba.saj.ads.poo.presentation;
 
-// controller principal: tela inicial com tabelas e botões de ação
-
-import br.edu.ifba.saj.ads.poo.business.ServicoAtividadesEsportivas;
-import br.edu.ifba.saj.ads.poo.data.RepositorioAtividades;
+import br.edu.ifba.saj.ads.poo.business.FabricaDeServicos;
+import br.edu.ifba.saj.ads.poo.business.GenericService;
+import br.edu.ifba.saj.ads.poo.business.InscricaoServiceI;
+import br.edu.ifba.saj.ads.poo.business.ResultadoServiceI;
 import br.edu.ifba.saj.ads.poo.model.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -24,33 +24,45 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.HBox;
 import java.time.LocalDate;
 import java.util.Optional;
+import java.util.function.Consumer;
 
-// classe que controla a tela principal e coordena as janelas auxiliares
 public class MainController {
-    // repositório criado em memória (será substituído por camada persistente no futuro)
-    RepositorioAtividades repositorio = new RepositorioAtividades();
-    // serviço de regras de negócio usado pelas telas
-    ServicoAtividadesEsportivas servico = new ServicoAtividadesEsportivas(repositorio);
 
-    // listas observáveis que alimentam as tabelas da interface
+    // a tela recebe os serviços prontos e só enxerga as interfaces
+    private final FabricaDeServicos fabrica = new FabricaDeServicos();
+
+    // botões de ação discretos, no mesmo cinza do resto da janela
+    private static final String ESTILO_ACAO = "-fx-background-color: #ebebeb; -fx-border-color: #c6c6c6;"
+        + " -fx-background-radius: 3; -fx-border-radius: 3;";
+    private static final String ESTILO_EDITAR = ESTILO_ACAO + " -fx-text-fill: #44526b;";
+    private static final String ESTILO_EXCLUIR = ESTILO_ACAO + " -fx-text-fill: #7d4a4a;";
+
+    GenericService<Atleta, Long> atletaService = fabrica.getAtletaService();
+    GenericService<Competicao, Long> competicaoService = fabrica.getCompeticaoService();
+    InscricaoServiceI inscricaoService = fabrica.getInscricaoService();
+    ResultadoServiceI resultadoService = fabrica.getResultadoService();
+
     private final ObservableList<Atleta> listaAtletas = FXCollections.observableArrayList();
     private final ObservableList<Competicao> listaCompeticoes = FXCollections.observableArrayList();
+    private final ObservableList<Inscricao> listaInscricoes = FXCollections.observableArrayList();
     private final ObservableList<Resultado> listaResultados = FXCollections.observableArrayList();
 
-    // componentes da tabela de atletas
     @FXML private TableView<Atleta> tabelaAtleta;
     @FXML private TableColumn<Atleta, String> colAtletaNome;
     @FXML private TableColumn<Atleta, String> colAtletaCategoria;
     @FXML private TableColumn<Atleta, Void> colAtletaAcoes;
 
-    // componentes da tabela de competições
     @FXML private TableView<Competicao> tabelaCompeticao;
     @FXML private TableColumn<Competicao, String> colCompeticaoNome;
     @FXML private TableColumn<Competicao, LocalDate> colCompeticaoData;
     @FXML private TableColumn<Competicao, Integer> colCompeticaoLimite;
     @FXML private TableColumn<Competicao, Void> colCompeticaoAcoes;
 
-    // componentes da tabela de resultados
+    @FXML private TableView<Inscricao> tabelaInscricao;
+    @FXML private TableColumn<Inscricao, String> colInscricaoAtleta;
+    @FXML private TableColumn<Inscricao, String> colInscricaoCompeticao;
+    @FXML private TableColumn<Inscricao, Void> colInscricaoAcoes;
+
     @FXML private TableView<Resultado> tabelaResultado;
     @FXML private TableColumn<Resultado, String> colResultadoCompeticao;
     @FXML private TableColumn<Resultado, String> colResultadoPrimeiro;
@@ -58,7 +70,6 @@ public class MainController {
     @FXML private TableColumn<Resultado, String> colResultadoTerceiro;
     @FXML private TableColumn<Resultado, Void> colResultadoAcoes;
 
-    // exibe um alerta genérico reaproveitado por todos os controllers
     public static void exibirAlerta(Alert.AlertType tipo, String titulo, String cabecalho, String mensagem) {
         Alert alert = new Alert(tipo);
         alert.setTitle(titulo);
@@ -67,14 +78,13 @@ public class MainController {
         alert.showAndWait();
     }
 
-    // inicializa tabelas, colunas e dados ao abrir a tela
     @FXML public void initialize() {
-        // vincula as listas observáveis às tabelas
         tabelaAtleta.setItems(listaAtletas);
         tabelaCompeticao.setItems(listaCompeticoes);
+        tabelaInscricao.setItems(listaInscricoes);
         tabelaResultado.setItems(listaResultados);
 
-        // mapeia as colunas simples via reflexão de propriedades
+        // colunas simples
         colAtletaNome.setCellValueFactory(new PropertyValueFactory<>("nome"));
         colAtletaCategoria.setCellValueFactory(new PropertyValueFactory<>("categoria"));
 
@@ -82,22 +92,30 @@ public class MainController {
         colCompeticaoData.setCellValueFactory(new PropertyValueFactory<>("data"));
         colCompeticaoLimite.setCellValueFactory(new PropertyValueFactory<>("limite"));
 
-        // colunas de resultado precisam navegar nos objetos relacionados
-        colResultadoCompeticao.setCellValueFactory(cell -> new SimpleStringProperty(cell.getValue().getCompeticao().getNome()));
-        colResultadoPrimeiro.setCellValueFactory(cell -> new SimpleStringProperty(cell.getValue().getPrimeiroLugar().getNome()));
-        colResultadoSegundo.setCellValueFactory(cell -> new SimpleStringProperty(cell.getValue().getSegundoLugar().getNome()));
-        colResultadoTerceiro.setCellValueFactory(cell -> new SimpleStringProperty(cell.getValue().getTerceiroLugar().getNome()));
+        // inscrição precisa navegar até o atleta e a competição
+        colInscricaoAtleta.setCellValueFactory(cell ->
+            new SimpleStringProperty(cell.getValue().getAtleta().getNome()));
+        colInscricaoCompeticao.setCellValueFactory(cell ->
+            new SimpleStringProperty(cell.getValue().getCompeticao().getNome()));
 
-        // configura os botões de ação (editar/excluir) em cada tabela
-        configurarColunaAcoesAtleta();
-        configurarColunaAcoesCompeticao();
-        configurarColunaAcoesResultado();
+        // resultado precisa navegar até os nomes dos atletas
+        colResultadoCompeticao.setCellValueFactory(cell ->
+            new SimpleStringProperty(cell.getValue().getCompeticao().getNome()));
+        colResultadoPrimeiro.setCellValueFactory(cell ->
+            new SimpleStringProperty(cell.getValue().getPrimeiroLugar().getNome()));
+        colResultadoSegundo.setCellValueFactory(cell ->
+            new SimpleStringProperty(cell.getValue().getSegundoLugar().getNome()));
+        colResultadoTerceiro.setCellValueFactory(cell ->
+            new SimpleStringProperty(cell.getValue().getTerceiroLugar().getNome()));
 
-        // carrega os dados atuais do repositório nas tabelas
+        configurarColunaAcoes(colAtletaAcoes, "atleta", this::abrirEdicaoAtleta, this::excluirAtleta);
+        configurarColunaAcoes(colCompeticaoAcoes, "competição", this::abrirEdicaoCompeticao, this::excluirCompeticao);
+        configurarColunaAcoes(colInscricaoAcoes, "inscrição", this::abrirEdicaoInscricao, this::excluirInscricao);
+        configurarColunaAcoes(colResultadoAcoes, "resultado", this::abrirEdicaoResultado, this::excluirResultado);
+
         atualizarTabela();
     }
 
-    // cria um botão pequeno usado nas colunas de ação
     private Button criarBotaoAcao(String texto, String tooltip, String estilo, Runnable acao) {
         Button botao = new Button(texto);
         botao.setMnemonicParsing(false);
@@ -109,33 +127,14 @@ public class MainController {
         return botao;
     }
 
-    // monta a célula de ações para a tabela de atletas (editar/excluir)
-    private void configurarColunaAcoesAtleta() {
-        colAtletaAcoes.setCellFactory(column -> new TableCell<>() {
-            // botões de editar (azul) e excluir (vermelho) compartilhados
-            private final Button editar = criarBotaoAcao("✎", "Editar atleta", "-fx-background-color: #2f80ed; -fx-text-fill: white; -fx-font-weight: bold;", () -> abrirEdicaoAtleta(getTableView().getItems().get(getIndex())));
-            private final Button excluir = criarBotaoAcao("🗑", "Excluir atleta", "-fx-background-color: #d64545; -fx-text-fill: white; -fx-font-weight: bold;", () -> excluirAtleta(getTableView().getItems().get(getIndex())));
-            private final HBox box = new HBox(6, editar, excluir);
-
-            {
-                box.setStyle("-fx-alignment: CENTER;");
-            }
-
-            // mostra os botões apenas nas células preenchidas
-            @Override
-            protected void updateItem(Void item, boolean empty) {
-                super.updateItem(item, empty);
-                setGraphic(empty ? null : box);
-            }
-        });
-    }
-
-    // monta a célula de ações para a tabela de competições
-    private void configurarColunaAcoesCompeticao() {
-        colCompeticaoAcoes.setCellFactory(column -> new TableCell<>() {
-            // botões de editar e excluir para competições
-            private final Button editar = criarBotaoAcao("✎", "Editar competição", "-fx-background-color: #2f80ed; -fx-text-fill: white; -fx-font-weight: bold;", () -> abrirEdicaoCompeticao(getTableView().getItems().get(getIndex())));
-            private final Button excluir = criarBotaoAcao("🗑", "Excluir competição", "-fx-background-color: #d64545; -fx-text-fill: white; -fx-font-weight: bold;", () -> excluirCompeticao(getTableView().getItems().get(getIndex())));
+    // monta a coluna de ações (editar/excluir) de qualquer uma das tabelas
+    private <S> void configurarColunaAcoes(TableColumn<S, Void> coluna, String entidade,
+                                           Consumer<S> aoEditar, Consumer<S> aoExcluir) {
+        coluna.setCellFactory(column -> new TableCell<>() {
+            private final Button editar = criarBotaoAcao("✎", "Editar " + entidade, ESTILO_EDITAR,
+                () -> aoEditar.accept(getTableView().getItems().get(getIndex())));
+            private final Button excluir = criarBotaoAcao("🗑", "Excluir " + entidade, ESTILO_EXCLUIR,
+                () -> aoExcluir.accept(getTableView().getItems().get(getIndex())));
             private final HBox box = new HBox(6, editar, excluir);
 
             {
@@ -150,34 +149,15 @@ public class MainController {
         });
     }
 
-    // monta a célula de ações para a tabela de resultados
-    private void configurarColunaAcoesResultado() {
-        colResultadoAcoes.setCellFactory(column -> new TableCell<>() {
-            // botões de editar e excluir para resultados
-            private final Button editar = criarBotaoAcao("✎", "Editar resultado", "-fx-background-color: #2f80ed; -fx-text-fill: white; -fx-font-weight: bold;", () -> abrirEdicaoResultado(getTableView().getItems().get(getIndex())));
-            private final Button excluir = criarBotaoAcao("🗑", "Excluir resultado", "-fx-background-color: #d64545; -fx-text-fill: white; -fx-font-weight: bold;", () -> excluirResultado(getTableView().getItems().get(getIndex())));
-            private final HBox box = new HBox(6, editar, excluir);
-
-            {
-                box.setStyle("-fx-alignment: CENTER;");
-            }
-
-            @Override
-            protected void updateItem(Void item, boolean empty) {
-                super.updateItem(item, empty);
-                setGraphic(empty ? null : box);
-            }
-        });
-    }
-
-    // recarrega as listas observáveis a partir do serviço
     private void atualizarTabela() {
-        listaAtletas.setAll(servico.listarAtletas());
-        listaCompeticoes.setAll(servico.listarCompeticoes());
-        listaResultados.setAll(servico.listarResultados());
+        listaAtletas.setAll(atletaService.buscarTodos());
+        listaCompeticoes.setAll(competicaoService.buscarTodos());
+        listaInscricoes.setAll(inscricaoService.buscarTodos());
+        listaResultados.setAll(resultadoService.buscarTodos());
 
         tabelaAtleta.refresh();
         tabelaCompeticao.refresh();
+        tabelaInscricao.refresh();
         tabelaResultado.refresh();
     }
 
@@ -187,16 +167,9 @@ public class MainController {
         Parent root = loader.load();
 
         CadastroCompeticaoController controller = loader.getController();
-        controller.setServico(this.servico);
+        controller.setServico(this.competicaoService);
 
-        Stage novoStage = new Stage();
-        novoStage.setTitle("Cadastro de Competição");
-        novoStage.initModality(Modality.APPLICATION_MODAL);
-        novoStage.setScene(new Scene(root));
-        novoStage.setResizable(false);
-        novoStage.showAndWait();
-
-        atualizarTabela();
+        abrirModal(root, "Cadastro de Competição");
     }
 
     // abre a janela de cadastro de atleta como modal
@@ -205,16 +178,9 @@ public class MainController {
         Parent root = loader.load();
 
         CadastroAtletaController controller = loader.getController();
-        controller.setServico(this.servico);
+        controller.setServico(this.atletaService);
 
-        Stage novoStage = new Stage();
-        novoStage.setTitle("Cadastro de Atleta");
-        novoStage.initModality(Modality.APPLICATION_MODAL);
-        novoStage.setScene(new Scene(root));
-        novoStage.setResizable(false);
-        novoStage.showAndWait();
-
-        atualizarTabela();
+        abrirModal(root, "Cadastro de Atleta");
     }
 
     // abre a janela de inscrição de atleta em competição
@@ -223,16 +189,11 @@ public class MainController {
         Parent root = loader.load();
 
         CadastroInscricaoController controller = loader.getController();
-        controller.setServico(servico);
+        controller.setAtletaService(atletaService);
+        controller.setCompeticaoService(competicaoService);
+        controller.setInscricaoService(inscricaoService);
 
-        Stage novoStage = new Stage();
-        novoStage.setTitle("Inscrição de Atleta");
-        novoStage.initModality(Modality.APPLICATION_MODAL);
-        novoStage.setScene(new Scene(root));
-        novoStage.setResizable(false);
-        novoStage.showAndWait();
-
-        atualizarTabela();
+        abrirModal(root, "Inscrição de Atleta");
     }
 
     // abre a janela de cadastro de resultado (pódio da competição)
@@ -241,85 +202,91 @@ public class MainController {
         Parent root = loader.load();
 
         CadastroResultadoController controller = loader.getController();
-        controller.setServico(servico);
+        controller.setCompeticaoService(competicaoService);
+        controller.setInscricaoService(inscricaoService);
+        controller.setResultadoService(resultadoService);
 
-        Stage novoStage = new Stage();
-        novoStage.setTitle("Cadastro de Resultado");
-        novoStage.initModality(Modality.APPLICATION_MODAL);
-        novoStage.setScene(new Scene(root));
-        novoStage.setResizable(false);
-        novoStage.showAndWait();
-
-        atualizarTabela();
+        abrirModal(root, "Cadastro de Resultado");
     }
 
     // abre a tela de edição de atleta reaproveitando o controller de cadastro
-    @FXML private void abrirEdicaoAtleta(Atleta atleta) {
+    private void abrirEdicaoAtleta(Atleta atleta) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/br/edu/ifba/saj/ads/poo/presentation/view/CadastroAtleta.fxml"));
             Parent root = loader.load();
 
             CadastroAtletaController controller = loader.getController();
-            controller.setServico(servico);
+            controller.setServico(atletaService);
             controller.setAtletaEditando(atleta);
 
-            Stage stage = new Stage();
-            stage.setTitle("Editar Atleta");
-            stage.initModality(Modality.APPLICATION_MODAL);
-            stage.setScene(new Scene(root));
-            stage.setResizable(false);
-            stage.showAndWait();
-
-            atualizarTabela();
+            abrirModal(root, "Editar Atleta");
         } catch (Exception e) {
             exibirAlerta(Alert.AlertType.ERROR, "Erro", "Não foi possível abrir a edição", e.getMessage());
         }
     }
 
     // abre a tela de edição de competição
-    @FXML private void abrirEdicaoCompeticao(Competicao competicao) {
+    private void abrirEdicaoCompeticao(Competicao competicao) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/br/edu/ifba/saj/ads/poo/presentation/view/CadastroCompeticao.fxml"));
             Parent root = loader.load();
 
             CadastroCompeticaoController controller = loader.getController();
-            controller.setServico(servico);
+            controller.setServico(competicaoService);
             controller.setCompeticaoEditando(competicao);
 
-            Stage stage = new Stage();
-            stage.setTitle("Editar Competição");
-            stage.initModality(Modality.APPLICATION_MODAL);
-            stage.setScene(new Scene(root));
-            stage.setResizable(false);
-            stage.showAndWait();
+            abrirModal(root, "Editar Competição");
+        } catch (Exception e) {
+            exibirAlerta(Alert.AlertType.ERROR, "Erro", "Não foi possível abrir a edição", e.getMessage());
+        }
+    }
 
-            atualizarTabela();
+    // abre a tela de edição de inscrição
+    private void abrirEdicaoInscricao(Inscricao inscricao) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/br/edu/ifba/saj/ads/poo/presentation/view/CadastroInscricao.fxml"));
+            Parent root = loader.load();
+
+            CadastroInscricaoController controller = loader.getController();
+            controller.setAtletaService(atletaService);
+            controller.setCompeticaoService(competicaoService);
+            controller.setInscricaoService(inscricaoService);
+            controller.setInscricaoEditando(inscricao);
+
+            abrirModal(root, "Editar Inscrição");
         } catch (Exception e) {
             exibirAlerta(Alert.AlertType.ERROR, "Erro", "Não foi possível abrir a edição", e.getMessage());
         }
     }
 
     // abre a tela de edição de resultado
-    @FXML private void abrirEdicaoResultado(Resultado resultado) {
+    private void abrirEdicaoResultado(Resultado resultado) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/br/edu/ifba/saj/ads/poo/presentation/view/CadastroResultado.fxml"));
             Parent root = loader.load();
 
             CadastroResultadoController controller = loader.getController();
-            controller.setServico(servico);
+            controller.setCompeticaoService(competicaoService);
+            controller.setInscricaoService(inscricaoService);
+            controller.setResultadoService(resultadoService);
             controller.setResultadoEditando(resultado);
 
-            Stage stage = new Stage();
-            stage.setTitle("Editar Resultado");
-            stage.initModality(Modality.APPLICATION_MODAL);
-            stage.setScene(new Scene(root));
-            stage.setResizable(false);
-            stage.showAndWait();
-
-            atualizarTabela();
+            abrirModal(root, "Editar Resultado");
         } catch (Exception e) {
             exibirAlerta(Alert.AlertType.ERROR, "Erro", "Não foi possível abrir a edição", e.getMessage());
         }
+    }
+
+    // abre a tela como modal e recarrega as tabelas quando ela fecha
+    private void abrirModal(Parent root, String titulo) {
+        Stage stage = new Stage();
+        stage.setTitle(titulo);
+        stage.initModality(Modality.APPLICATION_MODAL);
+        stage.setScene(new Scene(root));
+        stage.setResizable(false);
+        stage.showAndWait();
+
+        atualizarTabela();
     }
 
     // diálogo de confirmação genérico para exclusões
@@ -333,28 +300,44 @@ public class MainController {
         return resultado.isPresent() && resultado.get() == ButtonType.OK;
     }
 
-    // remove um atleta após confirmação
+    // remove um atleta após confirmação, junto do que depende dele
     private void excluirAtleta(Atleta atleta) {
-        if (!confirmarExclusao("Excluir atleta", "Deseja excluir o atleta selecionado?")) {
+        if (!confirmarExclusao("Excluir atleta",
+            "Excluir o atleta também remove suas inscrições e os resultados em que ele aparece. Continuar?")) {
             return;
         }
 
         try {
-            servico.removerAtleta(atleta.getId());
+            atletaService.deletar(atleta.getId());
             atualizarTabela();
         } catch (Exception e) {
             exibirAlerta(Alert.AlertType.ERROR, "Erro", "Não foi possível excluir", e.getMessage());
         }
     }
 
-    // remove uma competição após confirmação
+    // remove uma competição após confirmação, junto do que depende dela
     private void excluirCompeticao(Competicao competicao) {
-        if (!confirmarExclusao("Excluir competição", "Deseja excluir a competição selecionada?")) {
+        if (!confirmarExclusao("Excluir competição",
+            "Excluir a competição também remove suas inscrições e seu resultado. Continuar?")) {
             return;
         }
 
         try {
-            servico.removerCompeticao(competicao.getId());
+            competicaoService.deletar(competicao.getId());
+            atualizarTabela();
+        } catch (Exception e) {
+            exibirAlerta(Alert.AlertType.ERROR, "Erro", "Não foi possível excluir", e.getMessage());
+        }
+    }
+
+    // remove uma inscrição após confirmação
+    private void excluirInscricao(Inscricao inscricao) {
+        if (!confirmarExclusao("Excluir inscrição", "Deseja excluir a inscrição selecionada?")) {
+            return;
+        }
+
+        try {
+            inscricaoService.deletar(inscricao.getId());
             atualizarTabela();
         } catch (Exception e) {
             exibirAlerta(Alert.AlertType.ERROR, "Erro", "Não foi possível excluir", e.getMessage());
@@ -368,7 +351,7 @@ public class MainController {
         }
 
         try {
-            servico.removerResultado(resultado.getId());
+            resultadoService.deletar(resultado.getId());
             atualizarTabela();
         } catch (Exception e) {
             exibirAlerta(Alert.AlertType.ERROR, "Erro", "Não foi possível excluir", e.getMessage());
