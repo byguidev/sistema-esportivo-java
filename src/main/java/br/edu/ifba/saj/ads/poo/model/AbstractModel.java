@@ -40,7 +40,8 @@ public abstract class AbstractModel<T> {
     @Override 
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof AbstractModel<?> that)) return false;
+        if (o == null || getClass() != o.getClass()) return false;
+        AbstractModel<?> that = (AbstractModel<?>) o;
         return Objects.equals(id, that.id);
     }
 
@@ -51,6 +52,6 @@ public abstract class AbstractModel<T> {
 
     @Override
     public String toString() {
-        return getClass().getSimpleName() + "{id" + id + "}";
+        return getClass().getSimpleName() + "{id=" + id + "}";
     }
 }

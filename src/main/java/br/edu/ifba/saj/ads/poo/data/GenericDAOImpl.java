@@ -23,14 +23,19 @@ public class GenericDAOImpl<T extends AbstractModel<ID>, ID> implements GenericD
     
     @Override
     public ID salvar(T entidade) {
-        ID novoId = idGenerator.gerarNovoId(tipoId);
+        ID id = entidade.getId();
 
-        entidade.setId(novoId);
-        entidade.setCreatedAt(LocalDateTime.now());
+        // entidade nova: ganha id e data de criação
+        if (id == null) {
+            id = idGenerator.gerarNovoId(tipoId);
+            entidade.setId(id);
+            entidade.setCreatedAt(LocalDateTime.now());
+        }
+
         entidade.setUpdatedAt(LocalDateTime.now());
 
-        banco.put(novoId, entidade);
-        return novoId;
+        banco.put(id, entidade);
+        return id;
     }
 
     @Override

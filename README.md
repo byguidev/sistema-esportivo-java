@@ -1,14 +1,16 @@
 # Sistema Esportivo
 
-Sistema desktop em Java 17 com JavaFX e arquitetura em três camadas para cadastro de competições, inscrição de atletas e publicação de resultados/classificação.
+Sistema desktop em Java 17 com JavaFX para gerenciar competições, inscrições de atletas e resultados. Usa arquitetura em três camadas com persistência em memória.
 
-## Requisitos atendidos
+## Funcionalidades
 
-- Tela JavaFX para cadastro de competições, inscrição de atletas e visualização de resultados/classificação.
-- Validação de nome da competição, data e categoria do atleta.
-- Regras de negócio para limite de participantes e inscrição única por atleta.
-- Armazenamento em memória com `ArrayList`.
-- Operações CRUD no repositório para competição, atleta, inscrição e resultado.
+- Cadastro e edição de competições com limite de participantes
+- Inscrição de atletas em competições, com edição e cancelamento
+- Publicação de resultados (pódio)
+- Validações de regras de negócio (limite de vagas, inscrição única)
+- Excluir um atleta ou uma competição remove junto as inscrições e resultados que dependiam deles
+- Arquitetura genérica com `GenericDAO` e `GenericService`
+- Geração automática de IDs
 
 ## Como executar
 
@@ -27,9 +29,10 @@ mvn javafx:run
 ## Estrutura das camadas
 
 - `presentation`: camada de apresentação JavaFX.
-- `business`: regras de negócio e validações.
-- `data`: repositório em memória.
-- `model`: entidades do domínio.
+- `business`: regras de negócio e validações (`GenericService`/`GenericServiceImpl` e especializações). `FabricaDeServicos` monta os serviços com seus DAOs, então a apresentação recebe apenas interfaces.
+- `data`: persistência em memória (`GenericDAO`/`GenericDAOImpl` e especializações).
+- `model`: entidades do domínio, todas estendendo `AbstractModel<Long>`.
+- `util`: utilitários genéricos (`IdGenerator`).
 
 ## Diagrama de classes
 
@@ -39,23 +42,27 @@ mvn javafx:run
 classDiagram
     direction LR
 
+    class AbstractModel~T~ {
+        <<abstract>>
+        -T id
+        -LocalDateTime createdAt
+        -LocalDateTime updatedAt
+    }
+
     class Atleta {
         <<entity>>
-        -long id
         -String nome
         -String categoria
     }
 
     class Inscricao {
         <<entity>>
-        -long id
         -Atleta atleta
         -Competicao competicao
     }
 
     class Competicao {
         <<entity>>
-        -long id
         -String nome
         -LocalDate data
         -int limiteParticipantes
@@ -63,36 +70,63 @@ classDiagram
 
     class Resultado {
         <<entity>>
-        -long id
         -Competicao competicao
         -Atleta primeiroLugar
         -Atleta segundoLugar
         -Atleta terceiroLugar
     }
 
-    class ServicoAtividadesEsportivas {
-        <<business>>
-        +criarCompeticao(Competicao) void
-        +criarAtleta(Atleta) void
-        +criarInscricao(Inscricao) void
-        +criarResultado(Resultado) void
-        +validarLimiteParticipantes(Competicao) boolean
-        +validarInscricaoUnica(Competicao, Atleta) boolean
+    class GenericDAO~T,ID~ {
+        <<interface>>
+        +salvar(T) ID
+        +atualizar(T) void
+        +buscarPorId(ID) T
+        +deletar(ID) void
+        +buscarTodos() List~T~
     }
 
-    class RepositorioAtividades {
-        <<data>>
-        +salvarCompeticao(Competicao) void
-        +salvarAtleta(Atleta) void
-        +salvarInscricao(Inscricao) void
-        +salvarResultado(Resultado) void
+    class GenericService~T,ID~ {
+        <<interface>>
+        +salvar(T) ID
+        +atualizar(T) void
+        +buscarPorId(ID) T
+        +deletar(ID) void
+        +buscarTodos() List~T~
+        +validar(T) void
     }
+
+    class GenericDAOImpl~T,ID~ {
+        <<data>>
+        -Map~ID,T~ banco
+        -IdGenerator idGenerator
+    }
+
+    class GenericServiceImpl~T,ID~ {
+        <<business>>
+        #GenericDAO~T,ID~ dao
+    }
+
+    AbstractModel <|-- Atleta
+    AbstractModel <|-- Inscricao
+    AbstractModel <|-- Competicao
+    AbstractModel <|-- Resultado
+
+    GenericDAO <|.. GenericDAOImpl
+    GenericService <|.. GenericServiceImpl
+    GenericDAOImpl <|-- AtletaDAO
+    GenericDAOImpl <|-- CompeticaoDAO
+    GenericDAOImpl <|-- InscricaoDAO
+    GenericDAOImpl <|-- ResultadoDAO
+    GenericServiceImpl <|-- AtletaService
+    GenericServiceImpl <|-- CompeticaoService
+    GenericServiceImpl <|-- InscricaoService
+    GenericServiceImpl <|-- ResultadoService
+    GenericServiceImpl o-- GenericDAO : dao injetado
 
     Atleta "1" -- "0..*" Inscricao : inscrições
     Inscricao "0..*" -- "1" Competicao : competição
     Competicao "1" -- "0..*" Resultado : resultados
     Resultado "0..*" -- "1" Atleta : pódio
-    ServicoAtividadesEsportivas ..> RepositorioAtividades : usa
 ```
 
 ## Diagrama de sequência: cadastrar inscrição
@@ -101,21 +135,20 @@ classDiagram
 sequenceDiagram
     actor Usuario
     participant Tela as Tela JavaFX
-    participant Servico as ServicoAtividadesEsportivas
-    participant Repo as RepositorioAtividades
+    participant Servico as InscricaoService
+    participant DAO as InscricaoDAO (HashMap)
 
-    Usuario->>Tela: Cadastrar competição/inscrição
-    Tela->>Servico: processar(...)
-    Servico->>Servico: validarLimiteParticipantes()
-    Servico->>Servico: validarInscricaoUnica()
+    Usuario->>Tela: Cadastrar inscrição
+    Tela->>Servico: salvar(inscricao)
+    Servico->>Servico: validar() [limite de vagas, inscrição única]
 
     alt Regras atendidas
-        Servico->>Repo: salvarInscricao()
-        Repo-->>Servico: sucesso
+        Servico->>DAO: salvar(inscricao)
+        DAO-->>Servico: id gerado
         Servico-->>Tela: sucesso
         Tela-->>Usuario: Mensagem de sucesso
     else Regra violada
-        Servico-->>Tela: mensagem de erro
+        Servico-->>Tela: RegraDeNegocioException
         Tela-->>Usuario: Exibir alerta
     end
 ```
@@ -126,4 +159,6 @@ sequenceDiagram
 - Cadastrar atletas e realizar inscrições.
 - Tentar duplicar inscrição do mesmo atleta na mesma competição.
 - Completar o limite da competição e tentar uma nova inscrição.
-- Abrir a tela principal e conferir os resultados publicados.
+- Abrir a tela principal e conferir inscrições e resultados publicados.
+- Editar um resultado já cadastrado e salvar novamente.
+- Excluir uma competição e conferir que suas inscrições e seu resultado somem junto.
