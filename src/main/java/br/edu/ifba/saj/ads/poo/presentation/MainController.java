@@ -4,7 +4,9 @@ import br.edu.ifba.saj.ads.poo.business.FabricaDeServicos;
 import br.edu.ifba.saj.ads.poo.business.GenericService;
 import br.edu.ifba.saj.ads.poo.business.InscricaoServiceI;
 import br.edu.ifba.saj.ads.poo.business.ResultadoServiceI;
+import br.edu.ifba.saj.ads.poo.business.UsuarioServiceI;
 import br.edu.ifba.saj.ads.poo.model.*;
+import br.edu.ifba.saj.ads.poo.util.SessaoUsuario;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.beans.property.SimpleStringProperty;
@@ -29,7 +31,8 @@ import java.util.function.Consumer;
 public class MainController {
 
     // a tela recebe os serviços prontos e só enxerga as interfaces
-    private final FabricaDeServicos fabrica = new FabricaDeServicos();
+    // usa a instância única da fábrica, senão o login enxergaria um "banco" diferente do resto do sistema
+    private final FabricaDeServicos fabrica = FabricaDeServicos.getInstance();
 
     // botões de ação discretos, no mesmo cinza do resto da janela
     private static final String ESTILO_ACAO = "-fx-background-color: #ebebeb; -fx-border-color: #c6c6c6;"
@@ -41,11 +44,13 @@ public class MainController {
     GenericService<Competicao, Long> competicaoService = fabrica.getCompeticaoService();
     InscricaoServiceI inscricaoService = fabrica.getInscricaoService();
     ResultadoServiceI resultadoService = fabrica.getResultadoService();
+    UsuarioServiceI usuarioService = fabrica.getUsuarioService();
 
     private final ObservableList<Atleta> listaAtletas = FXCollections.observableArrayList();
     private final ObservableList<Competicao> listaCompeticoes = FXCollections.observableArrayList();
     private final ObservableList<Inscricao> listaInscricoes = FXCollections.observableArrayList();
     private final ObservableList<Resultado> listaResultados = FXCollections.observableArrayList();
+    private final ObservableList<Usuario> listaUsuarios = FXCollections.observableArrayList();
 
     @FXML private TableView<Atleta> tabelaAtleta;
     @FXML private TableColumn<Atleta, String> colAtletaNome;
@@ -70,6 +75,15 @@ public class MainController {
     @FXML private TableColumn<Resultado, String> colResultadoTerceiro;
     @FXML private TableColumn<Resultado, Void> colResultadoAcoes;
 
+    // seção administrativa: só aparece pra quem loga como ADMIN (ver aplicarPermissoes)
+    @FXML private javafx.scene.layout.VBox secaoUsuarios;
+    @FXML private Button cadastrarUsuarioBtn;
+    @FXML private Button auditoriaBtn;
+    @FXML private TableView<Usuario> tabelaUsuario;
+    @FXML private TableColumn<Usuario, String> colUsuarioLogin;
+    @FXML private TableColumn<Usuario, Perfil> colUsuarioPerfil;
+    @FXML private TableColumn<Usuario, Void> colUsuarioAcoes;
+
     public static void exibirAlerta(Alert.AlertType tipo, String titulo, String cabecalho, String mensagem) {
         Alert alert = new Alert(tipo);
         alert.setTitle(titulo);
@@ -83,6 +97,7 @@ public class MainController {
         tabelaCompeticao.setItems(listaCompeticoes);
         tabelaInscricao.setItems(listaInscricoes);
         tabelaResultado.setItems(listaResultados);
+        tabelaUsuario.setItems(listaUsuarios);
 
         // colunas simples
         colAtletaNome.setCellValueFactory(new PropertyValueFactory<>("nome"));
@@ -108,12 +123,30 @@ public class MainController {
         colResultadoTerceiro.setCellValueFactory(cell ->
             new SimpleStringProperty(cell.getValue().getTerceiroLugar().getNome()));
 
+        colUsuarioLogin.setCellValueFactory(new PropertyValueFactory<>("login"));
+        colUsuarioPerfil.setCellValueFactory(new PropertyValueFactory<>("perfil"));
+
         configurarColunaAcoes(colAtletaAcoes, "atleta", this::abrirEdicaoAtleta, this::excluirAtleta);
         configurarColunaAcoes(colCompeticaoAcoes, "competição", this::abrirEdicaoCompeticao, this::excluirCompeticao);
         configurarColunaAcoes(colInscricaoAcoes, "inscrição", this::abrirEdicaoInscricao, this::excluirInscricao);
         configurarColunaAcoes(colResultadoAcoes, "resultado", this::abrirEdicaoResultado, this::excluirResultado);
+        configurarColunaAcoes(colUsuarioAcoes, "usuário", this::abrirEdicaoUsuario, this::excluirUsuario);
 
+        aplicarPermissoes();
         atualizarTabela();
+    }
+
+    // esconde os recursos administrativos (cadastro de usuário e auditoria) de quem não logou como ADMIN
+    private void aplicarPermissoes() {
+        Usuario logado = SessaoUsuario.getUsuarioLogado();
+        boolean admin = logado != null && logado.getPerfil() == Perfil.ADMIN;
+
+        cadastrarUsuarioBtn.setVisible(admin);
+        cadastrarUsuarioBtn.setManaged(admin);
+        auditoriaBtn.setVisible(admin);
+        auditoriaBtn.setManaged(admin);
+        secaoUsuarios.setVisible(admin);
+        secaoUsuarios.setManaged(admin);
     }
 
     private Button criarBotaoAcao(String texto, String tooltip, String estilo, Runnable acao) {
@@ -154,11 +187,13 @@ public class MainController {
         listaCompeticoes.setAll(competicaoService.buscarTodos());
         listaInscricoes.setAll(inscricaoService.buscarTodos());
         listaResultados.setAll(resultadoService.buscarTodos());
+        listaUsuarios.setAll(usuarioService.buscarTodos());
 
         tabelaAtleta.refresh();
         tabelaCompeticao.refresh();
         tabelaInscricao.refresh();
         tabelaResultado.refresh();
+        tabelaUsuario.refresh();
     }
 
     // abre a janela de cadastro de competição como modal
@@ -170,6 +205,41 @@ public class MainController {
         controller.setServico(this.competicaoService);
 
         abrirModal(root, "Cadastro de Competição");
+    }
+
+    // abre a janela de cadastro de usuário como modal (só o botão do admin chama isso)
+    @FXML private void abrirCadastroUsuario() throws Exception {
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/br/edu/ifba/saj/ads/poo/presentation/view/CadastroUsuario.fxml"));
+        Parent root = loader.load();
+
+        CadastroUsuarioController controller = loader.getController();
+        controller.setServico(this.usuarioService);
+
+        abrirModal(root, "Cadastro de Usuário");
+    }
+
+    // abre a tela de auditoria como modal
+    @FXML private void abrirAuditoria() throws Exception {
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/br/edu/ifba/saj/ads/poo/presentation/view/Auditoria.fxml"));
+        Parent root = loader.load();
+
+        abrirModal(root, "Auditoria");
+    }
+
+    // desloga o usuário atual e volta pra tela de login
+    @FXML private void onSair() {
+        try {
+            SessaoUsuario.deslogar();
+
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/br/edu/ifba/saj/ads/poo/presentation/view/Login.fxml"));
+            Parent root = loader.load();
+
+            Stage stage = (Stage) tabelaAtleta.getScene().getWindow();
+            stage.setTitle("Login");
+            stage.setScene(new Scene(root));
+        } catch (Exception e) {
+            exibirAlerta(Alert.AlertType.ERROR, "Erro", "Não foi possível sair", e.getMessage());
+        }
     }
 
     // abre a janela de cadastro de atleta como modal
@@ -277,6 +347,22 @@ public class MainController {
         }
     }
 
+    // abre a tela de edição de usuário
+    private void abrirEdicaoUsuario(Usuario usuario) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/br/edu/ifba/saj/ads/poo/presentation/view/CadastroUsuario.fxml"));
+            Parent root = loader.load();
+
+            CadastroUsuarioController controller = loader.getController();
+            controller.setServico(usuarioService);
+            controller.setUsuarioEditando(usuario);
+
+            abrirModal(root, "Editar Usuário");
+        } catch (Exception e) {
+            exibirAlerta(Alert.AlertType.ERROR, "Erro", "Não foi possível abrir a edição", e.getMessage());
+        }
+    }
+
     // abre a tela como modal e recarrega as tabelas quando ela fecha
     private void abrirModal(Parent root, String titulo) {
         Stage stage = new Stage();
@@ -352,6 +438,20 @@ public class MainController {
 
         try {
             resultadoService.deletar(resultado.getId());
+            atualizarTabela();
+        } catch (Exception e) {
+            exibirAlerta(Alert.AlertType.ERROR, "Erro", "Não foi possível excluir", e.getMessage());
+        }
+    }
+
+    // remove um usuário após confirmação
+    private void excluirUsuario(Usuario usuario) {
+        if (!confirmarExclusao("Excluir usuário", "Deseja excluir o usuário selecionado?")) {
+            return;
+        }
+
+        try {
+            usuarioService.deletar(usuario.getId());
             atualizarTabela();
         } catch (Exception e) {
             exibirAlerta(Alert.AlertType.ERROR, "Erro", "Não foi possível excluir", e.getMessage());

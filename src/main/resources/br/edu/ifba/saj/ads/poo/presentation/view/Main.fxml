@@ -12,6 +12,11 @@
 
 <VBox maxHeight="-Infinity" maxWidth="1.7976931348623157E308" minHeight="-Infinity" minWidth="-Infinity" prefHeight="780.0" prefWidth="644.0" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="br.edu.ifba.saj.ads.poo.presentation.MainController">
    <children>
+      <HBox prefHeight="25.0" prefWidth="668.0">
+         <children>
+            <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#onSair" prefHeight="25.0" prefWidth="101.0" text="Sair" HBox.hgrow="ALWAYS" />
+         </children>
+      </HBox>
       <HBox prefHeight="45.0" prefWidth="668.0">
          <children>
             <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#abrirCadastroCompeticao" prefHeight="25.0" prefWidth="101.0" text="Cadastrar Competição" HBox.hgrow="ALWAYS">
@@ -21,9 +26,15 @@
             </Button>
             <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#abrirCadastroAtleta" text="Cadastrar Atleta" HBox.hgrow="ALWAYS">
                <HBox.margin>
-                  <Insets />
+                  <Insets right="10.0" />
                </HBox.margin>
             </Button>
+            <Button fx:id="cadastrarUsuarioBtn" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#abrirCadastroUsuario" text="Cadastrar Usuário" HBox.hgrow="ALWAYS">
+               <HBox.margin>
+                  <Insets right="10.0" />
+               </HBox.margin>
+            </Button>
+            <Button fx:id="auditoriaBtn" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#abrirAuditoria" text="Auditoria" HBox.hgrow="ALWAYS" />
          </children>
       </HBox>
       <HBox prefHeight="45.0" prefWidth="708.0">
@@ -121,6 +132,25 @@
                   <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#abrirCadastroResultado" prefHeight="4.0" prefWidth="801.0" text="Adicionar +" HBox.hgrow="ALWAYS" />
                </children>
             </HBox>
+         </children>
+      </VBox>
+      <VBox fx:id="secaoUsuarios" prefHeight="237.0" prefWidth="600.0">
+         <children>
+            <Label alignment="CENTER" maxWidth="1.7976931348623157E308" prefHeight="50.0" prefWidth="708.0" text="USUÁRIOS CADASTRADOS" VBox.vgrow="ALWAYS">
+               <font>
+                  <Font name="System Bold" size="16.0" />
+               </font>
+            </Label>
+            <TableView fx:id="tabelaUsuario" maxHeight="1.7976931348623157E308" prefHeight="200.0" prefWidth="700.0" VBox.vgrow="ALWAYS">
+               <columns>
+                  <TableColumn fx:id="colUsuarioLogin" prefWidth="360.0" style="-fx-font-weight: normal;" text="LOGIN" />
+                  <TableColumn fx:id="colUsuarioPerfil" prefWidth="240.0" style="-fx-font-weight: normal;" text="PERFIL" />
+                  <TableColumn fx:id="colUsuarioAcoes" prefWidth="120.0" style="-fx-font-weight: normal;" text="AÇÕES" />
+               </columns>
+               <columnResizePolicy>
+                  <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+               </columnResizePolicy>
+            </TableView>
          </children>
       </VBox>
    </children>

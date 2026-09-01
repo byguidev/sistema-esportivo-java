@@ -12,13 +12,14 @@ public class App extends Application {
     // monta o stage inicial lendo o fxml principal
     @Override
     public void start(Stage stage) throws Exception {
+        // a aplicação sempre começa pela tela de login; ela troca a cena pra Main.fxml quando autentica
         FXMLLoader loader = new FXMLLoader(
-            getClass().getResource("/br/edu/ifba/saj/ads/poo/presentation/view/Main.fxml")
+            getClass().getResource("/br/edu/ifba/saj/ads/poo/presentation/view/Login.fxml")
         );
 
         Scene scene = new Scene(loader.load());
 
-        stage.setTitle("Sistema Esportivo");
+        stage.setTitle("Login");
         stage.setScene(scene);
         stage.show();
     }
