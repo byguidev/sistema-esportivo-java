@@ -7,6 +7,9 @@ public abstract class AbstractModel<T> {
     private T id;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    // login de quem criou e de quem fez a última alteração no registro (usado na tela de auditoria)
+    private String criadoPor;
+    private String atualizadoPor;
 
     protected AbstractModel() {
         this.createdAt = LocalDateTime.now();
@@ -37,7 +40,23 @@ public abstract class AbstractModel<T> {
         this.updatedAt = updatedAt;
     }
 
-    @Override 
+    public String getCriadoPor() {
+        return criadoPor;
+    }
+
+    public void setCriadoPor(String criadoPor) {
+        this.criadoPor = criadoPor;
+    }
+
+    public String getAtualizadoPor() {
+        return atualizadoPor;
+    }
+
+    public void setAtualizadoPor(String atualizadoPor) {
+        this.atualizadoPor = atualizadoPor;
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
