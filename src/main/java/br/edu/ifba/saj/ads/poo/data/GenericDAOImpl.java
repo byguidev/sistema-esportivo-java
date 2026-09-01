@@ -2,6 +2,7 @@ package br.edu.ifba.saj.ads.poo.data;
 
 import br.edu.ifba.saj.ads.poo.model.AbstractModel;
 import br.edu.ifba.saj.ads.poo.util.IdGenerator;
+import br.edu.ifba.saj.ads.poo.util.SessaoUsuario;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -25,14 +26,16 @@ public class GenericDAOImpl<T extends AbstractModel<ID>, ID> implements GenericD
     public ID salvar(T entidade) {
         ID id = entidade.getId();
 
-        // entidade nova: ganha id e data de criação
+        // entidade nova: ganha id, data de criação e o login de quem criou
         if (id == null) {
             id = idGenerator.gerarNovoId(tipoId);
             entidade.setId(id);
             entidade.setCreatedAt(LocalDateTime.now());
+            entidade.setCriadoPor(SessaoUsuario.getLoginAtual());
         }
 
         entidade.setUpdatedAt(LocalDateTime.now());
+        entidade.setAtualizadoPor(SessaoUsuario.getLoginAtual());
 
         banco.put(id, entidade);
         return id;
@@ -45,6 +48,7 @@ public class GenericDAOImpl<T extends AbstractModel<ID>, ID> implements GenericD
         }
 
         entidade.setUpdatedAt(LocalDateTime.now());
+        entidade.setAtualizadoPor(SessaoUsuario.getLoginAtual());
         banco.put(entidade.getId(), entidade);
     }
 
