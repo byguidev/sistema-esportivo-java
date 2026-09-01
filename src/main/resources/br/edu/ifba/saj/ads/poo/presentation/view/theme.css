@@ -1,0 +1,240 @@
+/*
+ * Tema visual único da aplicação (claro, verde-esportivo, flat).
+ * Aplicado a toda Scene pela classe Theme — ver Theme.aplicar(Scene).
+ */
+
+.root {
+    -fx-font-family: "Segoe UI", "Arial", sans-serif;
+    -fx-font-size: 13px;
+    -fx-background-color: #F4F7F5;
+    -fx-text-fill: #22302A;
+}
+
+/* ===== Barra de topo (Main.fxml) ===== */
+
+.toolbar {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: transparent transparent #DCE7E0 transparent;
+    -fx-border-width: 0 0 1 0;
+    -fx-padding: 8 0 8 0;
+}
+
+/* ===== Títulos de seção ===== */
+
+.section-title {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #1F5C39;
+    -fx-padding: 10 0 10 0;
+}
+
+/* ===== Botões ===== */
+
+.btn {
+    -fx-background-color: #2E7D46;
+    -fx-text-fill: #FFFFFF;
+    -fx-font-weight: 600;
+    -fx-background-radius: 5;
+    -fx-border-radius: 5;
+    -fx-padding: 6 14 6 14;
+    -fx-cursor: hand;
+}
+
+.btn:hover {
+    -fx-background-color: #256B3A;
+}
+
+.btn:pressed,
+.btn:armed {
+    -fx-background-color: #1F5930;
+}
+
+.btn:focused {
+    -fx-background-color: #2E7D46;
+    -fx-border-color: #A9D6B8;
+    -fx-border-width: 2;
+    -fx-border-radius: 5;
+    -fx-background-insets: 0;
+}
+
+.btn:disabled {
+    -fx-opacity: 0.55;
+}
+
+/* botão secundário: ações de menor destaque, como sair */
+.button-secondary {
+    -fx-background-color: #FFFFFF;
+    -fx-text-fill: #2E7D46;
+    -fx-border-color: #2E7D46;
+    -fx-border-width: 1.5;
+    -fx-background-radius: 5;
+    -fx-border-radius: 5;
+}
+
+.button-secondary:hover {
+    -fx-background-color: #EAF3EC;
+}
+
+.button-secondary:pressed,
+.button-secondary:armed {
+    -fx-background-color: #DCEAE1;
+}
+
+.button-secondary:focused {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: #2E7D46;
+    -fx-border-width: 2;
+    -fx-background-insets: 0;
+}
+
+/* ===== Campos de entrada ===== */
+
+.text-field,
+.password-field,
+.combo-box,
+.date-picker,
+.spinner {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: #C7D3CC;
+    -fx-border-width: 1;
+    -fx-background-radius: 4;
+    -fx-border-radius: 4;
+    -fx-padding: 5 8 5 8;
+}
+
+.text-field:focused,
+.password-field:focused,
+.combo-box:focused,
+.date-picker:focused,
+.spinner:focused,
+.combo-box-popup .list-view {
+    -fx-border-color: #2E7D46;
+}
+
+.combo-box > .list-cell,
+.date-picker .text-field {
+    -fx-background-color: transparent;
+    -fx-border-width: 0;
+    -fx-padding: 0 0 0 2;
+}
+
+.spinner .text-field {
+    -fx-border-width: 0;
+    -fx-background-color: transparent;
+}
+
+/* devolve o calendário do date picker ao visual padrão do JavaFX
+   (sem isso, as setas de mês herdavam o verde do .btn e o texto ficava ilegível) */
+.date-picker-popup .label {
+    -fx-text-fill: -fx-text-base-color;
+}
+
+/* ===== Labels de formulário ===== */
+
+.label {
+    -fx-text-fill: #3C4C44;
+}
+
+/* ===== Tabelas ===== */
+
+.table-view {
+    -fx-background-color: #FFFFFF;
+    -fx-background-insets: 0;
+    -fx-padding: 0;
+    -fx-fixed-cell-size: 34px;
+}
+
+.table-view .column-header-background {
+    -fx-background-color: #E4EFE8;
+}
+
+.table-view .column-header,
+.table-view .filler {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent #DCE7E0 transparent transparent;
+    -fx-size: 34px;
+}
+
+.table-view .column-header .label {
+    -fx-text-fill: #1F5C39;
+    -fx-font-weight: bold;
+    -fx-alignment: CENTER;
+}
+
+.table-row-cell {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: transparent transparent #EEF3F0 transparent;
+    -fx-table-cell-border-color: transparent;
+}
+
+.table-row-cell:odd {
+    -fx-background-color: #F6FAF7;
+}
+
+.table-row-cell:selected {
+    -fx-background-color: #CFE8DA;
+}
+
+.table-row-cell:selected .text {
+    -fx-fill: #1F3D2C;
+}
+
+.table-view .cell {
+    -fx-padding: 0 8 0 8;
+    -fx-alignment: CENTER_LEFT;
+}
+
+/* ===== Abas ===== */
+
+.tab-pane .tab-header-background {
+    -fx-background-color: transparent;
+}
+
+.tab-pane .tab-header-area {
+    -fx-padding: 0 0 0 0;
+}
+
+.tab-pane .tab-content-area {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: #DCE7E0;
+    -fx-border-width: 1;
+    -fx-background-radius: 0 6 6 6;
+    -fx-border-radius: 0 6 6 6;
+}
+
+.tab {
+    -fx-background-color: #E4EFE8;
+    -fx-background-radius: 6 6 0 0;
+    -fx-border-radius: 6 6 0 0;
+    -fx-padding: 4 4 4 4;
+}
+
+.tab:hover {
+    -fx-background-color: #D6E7DC;
+}
+
+.tab:selected {
+    -fx-background-color: #FFFFFF;
+    -fx-border-color: #2E7D46 #DCE7E0 transparent #DCE7E0;
+    -fx-border-width: 3 1 0 1;
+}
+
+.tab .tab-label {
+    -fx-text-fill: #3C4C44;
+    -fx-font-weight: 600;
+}
+
+.tab:selected .tab-label {
+    -fx-text-fill: #1F5C39;
+}
+
+.tab-pane .tab-down-button,
+.tab-pane .control-buttons-tab {
+    -fx-background-color: #FFFFFF;
+}
+
+/* ===== Separador ===== */
+
+.separator .line {
+    -fx-border-color: #DCE7E0 transparent transparent transparent;
+}

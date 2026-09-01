@@ -7,6 +7,8 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
+import br.edu.ifba.saj.ads.poo.presentation.Theme;
+
 // ponto de entrada do javafx: carrega a tela principal a partir do fxml
 public class App extends Application {
     // monta o stage inicial lendo o fxml principal
@@ -18,6 +20,7 @@ public class App extends Application {
         );
 
         Scene scene = new Scene(loader.load());
+        Theme.aplicar(scene);
 
         stage.setTitle("Login");
         stage.setScene(scene);
