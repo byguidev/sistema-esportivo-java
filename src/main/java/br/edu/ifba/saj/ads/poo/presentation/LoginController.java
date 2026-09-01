@@ -44,8 +44,10 @@ public class LoginController {
             Parent root = loader.load();
 
             Stage stage = (Stage) ((Node) login).getScene().getWindow();
+            Scene scene = new Scene(root);
+            Theme.aplicar(scene);
             stage.setTitle("Sistema Esportivo");
-            stage.setScene(new Scene(root));
+            stage.setScene(scene);
         } catch (Exception e) {
             MainController.exibirAlerta(Alert.AlertType.ERROR, "Erro",
                 "Não foi possível abrir o sistema", e.getMessage());

@@ -19,11 +19,18 @@ import javafx.stage.Stage;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.geometry.Pos;
+import javafx.scene.Group;
+import javafx.scene.Node;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Region;
+import javafx.scene.shape.SVGPath;
 import java.time.LocalDate;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -34,11 +41,16 @@ public class MainController {
     // usa a instância única da fábrica, senão o login enxergaria um "banco" diferente do resto do sistema
     private final FabricaDeServicos fabrica = FabricaDeServicos.getInstance();
 
-    // botões de ação discretos, no mesmo cinza do resto da janela
-    private static final String ESTILO_ACAO = "-fx-background-color: #ebebeb; -fx-border-color: #c6c6c6;"
-        + " -fx-background-radius: 3; -fx-border-radius: 3;";
-    private static final String ESTILO_EDITAR = ESTILO_ACAO + " -fx-text-fill: #44526b;";
-    private static final String ESTILO_EXCLUIR = ESTILO_ACAO + " -fx-text-fill: #7d4a4a;";
+    // botões de ação discretos, em neutro claro pra não competir com o verde principal
+    private static final String ESTILO_ACAO = "-fx-background-color: #EEF3F0; -fx-border-color: #C7D3CC;"
+        + " -fx-background-radius: 5; -fx-border-radius: 5;";
+    private static final String ESTILO_EDITAR = ESTILO_ACAO + " -fx-text-fill: #3C4C44;";
+    private static final String ESTILO_EXCLUIR = ESTILO_ACAO + " -fx-text-fill: #A34A4A;";
+    private static final String COR_ICONE_EXCLUIR = "#A34A4A";
+
+    // ícone de lixeira (excluir) — vetor, não depende de fonte com emoji
+    private static final String SVG_LIXEIRA = "M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12Z "
+        + "M19 4h-3.5l-1-1h-5l-1 1H5v2h14V4Z";
 
     GenericService<Atleta, Long> atletaService = fabrica.getAtletaService();
     GenericService<Competicao, Long> competicaoService = fabrica.getCompeticaoService();
@@ -76,8 +88,9 @@ public class MainController {
     @FXML private TableColumn<Resultado, Void> colResultadoAcoes;
 
     // seção administrativa: só aparece pra quem loga como ADMIN (ver aplicarPermissoes)
-    @FXML private javafx.scene.layout.VBox secaoUsuarios;
-    @FXML private Button cadastrarUsuarioBtn;
+    @FXML private TabPane tabPanePrincipal;
+    @FXML private Tab tabUsuarios;
+    @FXML private HBox auditoriaRow;
     @FXML private Button auditoriaBtn;
     @FXML private TableView<Usuario> tabelaUsuario;
     @FXML private TableColumn<Usuario, String> colUsuarioLogin;
@@ -141,18 +154,19 @@ public class MainController {
         Usuario logado = SessaoUsuario.getUsuarioLogado();
         boolean admin = logado != null && logado.getPerfil() == Perfil.ADMIN;
 
-        cadastrarUsuarioBtn.setVisible(admin);
-        cadastrarUsuarioBtn.setManaged(admin);
         auditoriaBtn.setVisible(admin);
         auditoriaBtn.setManaged(admin);
-        secaoUsuarios.setVisible(admin);
-        secaoUsuarios.setManaged(admin);
+        auditoriaRow.setVisible(admin);
+        auditoriaRow.setManaged(admin);
+        if (!admin) {
+            tabPanePrincipal.getTabs().remove(tabUsuarios);
+        }
     }
 
-    private Button criarBotaoAcao(String texto, String tooltip, String estilo, Runnable acao) {
+    private Button criarBotaoAcao(String texto, String tooltip, double largura, String estilo, Runnable acao) {
         Button botao = new Button(texto);
         botao.setMnemonicParsing(false);
-        botao.setPrefWidth(32);
+        botao.setPrefWidth(largura);
         botao.setPrefHeight(28);
         botao.setStyle(estilo);
         botao.setTooltip(new javafx.scene.control.Tooltip(tooltip));
@@ -160,18 +174,53 @@ public class MainController {
         return botao;
     }
 
-    // monta a coluna de ações (editar/excluir) de qualquer uma das tabelas
+    // ícone de lixeira desenhado em vetor (SVG), na cor de exclusão
+    private Node criarIconeLixeira() {
+        SVGPath forma = new SVGPath();
+        forma.setContent(SVG_LIXEIRA);
+        forma.setStyle("-fx-fill: " + COR_ICONE_EXCLUIR + ";");
+        forma.setScaleX(0.5);
+        forma.setScaleY(0.5);
+        return new Group(forma);
+    }
+
+    private Button criarBotaoAcaoIcone(Node icone, String tooltip, double largura, String estilo, Runnable acao) {
+        Button botao = new Button();
+        botao.setGraphic(icone);
+        botao.setMnemonicParsing(false);
+        botao.setPrefWidth(largura);
+        botao.setPrefHeight(28);
+        botao.setStyle(estilo);
+        botao.setTooltip(new javafx.scene.control.Tooltip(tooltip));
+        botao.setOnAction(event -> acao.run());
+        return botao;
+    }
+
+    // largura da coluna: conteúdo (2 botões de 32px + espaçamento de 6px = 70px) mais uma folga pequena
+    private static final double LARGURA_COLUNA_ACOES = 78;
+
+    // o corpo das linhas da tabela renderiza ~9px deslocado pra direita em relação ao cabeçalho da
+    // coluna (o JavaFX reserva espaço pra uma scrollbar vertical no total das linhas, mas não no
+    // cabeçalho — então a largura total do corpo fica maior que a do cabeçalho). Sem essa correção,
+    // o conteúdo desta coluna, embora corretamente centralizado dentro da própria célula, aparece
+    // deslocado pra direita em relação ao título "AÇÕES" acima dela.
+    private static final double CORRECAO_DESLOCAMENTO_LINHA = -9;
+
     private <S> void configurarColunaAcoes(TableColumn<S, Void> coluna, String entidade,
                                            Consumer<S> aoEditar, Consumer<S> aoExcluir) {
         coluna.setCellFactory(column -> new TableCell<>() {
-            private final Button editar = criarBotaoAcao("✎", "Editar " + entidade, ESTILO_EDITAR,
+            private final Button editar = criarBotaoAcao("...", "Editar " + entidade, 32, ESTILO_EDITAR,
                 () -> aoEditar.accept(getTableView().getItems().get(getIndex())));
-            private final Button excluir = criarBotaoAcao("🗑", "Excluir " + entidade, ESTILO_EXCLUIR,
-                () -> aoExcluir.accept(getTableView().getItems().get(getIndex())));
+            private final Button excluir = criarBotaoAcaoIcone(criarIconeLixeira(), "Excluir " + entidade, 32,
+                ESTILO_EXCLUIR, () -> aoExcluir.accept(getTableView().getItems().get(getIndex())));
             private final HBox box = new HBox(6, editar, excluir);
 
             {
-                box.setStyle("-fx-alignment: CENTER;");
+                box.setAlignment(Pos.CENTER);
+                box.prefWidthProperty().bind(coluna.widthProperty());
+                box.setMaxWidth(Region.USE_PREF_SIZE);
+                setTranslateX(CORRECAO_DESLOCAMENTO_LINHA);
+                setStyle("-fx-padding: 0;");
             }
 
             @Override
@@ -180,6 +229,10 @@ public class MainController {
                 setGraphic(empty ? null : box);
             }
         });
+        coluna.setResizable(false);
+        coluna.setMinWidth(LARGURA_COLUNA_ACOES);
+        coluna.setMaxWidth(LARGURA_COLUNA_ACOES);
+        coluna.setPrefWidth(LARGURA_COLUNA_ACOES);
     }
 
     private void atualizarTabela() {
@@ -235,8 +288,10 @@ public class MainController {
             Parent root = loader.load();
 
             Stage stage = (Stage) tabelaAtleta.getScene().getWindow();
+            Scene scene = new Scene(root);
+            Theme.aplicar(scene);
             stage.setTitle("Login");
-            stage.setScene(new Scene(root));
+            stage.setScene(scene);
         } catch (Exception e) {
             exibirAlerta(Alert.AlertType.ERROR, "Erro", "Não foi possível sair", e.getMessage());
         }
@@ -366,9 +421,11 @@ public class MainController {
     // abre a tela como modal e recarrega as tabelas quando ela fecha
     private void abrirModal(Parent root, String titulo) {
         Stage stage = new Stage();
+        Scene scene = new Scene(root);
+        Theme.aplicar(scene);
         stage.setTitle(titulo);
         stage.initModality(Modality.APPLICATION_MODAL);
-        stage.setScene(new Scene(root));
+        stage.setScene(scene);
         stage.setResizable(false);
         stage.showAndWait();
 
