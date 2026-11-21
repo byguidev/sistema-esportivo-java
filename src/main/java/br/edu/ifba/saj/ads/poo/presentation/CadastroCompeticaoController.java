@@ -41,18 +41,22 @@ public class CadastroCompeticaoController {
     }
 
     public void salvarCompeticao() throws Exception {
+        Competicao competicao = new Competicao(nome.getText(), data.getValue(),
+            limiteParticipantes.getValue());
+
         if (competicaoEditando == null) {
-            // novo cadastro
-            Competicao novaCompeticao = new Competicao(nome.getText(), data.getValue(),
-                limiteParticipantes.getValue());
-            servico.salvar(novaCompeticao);
+            servico.salvar(competicao);
             return;
         }
 
-        // atualizar existente
-        competicaoEditando.setNome(nome.getText());
-        competicaoEditando.setData(data.getValue());
-        competicaoEditando.setLimite(limiteParticipantes.getValue());
+        // valida os novos dados numa cópia antes de tocar no registro real: assim uma
+        // alteração recusada (ex.: limite abaixo dos inscritos) não fica gravada na competição
+        competicao.setId(competicaoEditando.getId());
+        servico.validar(competicao);
+
+        competicaoEditando.setNome(competicao.getNome());
+        competicaoEditando.setData(competicao.getData());
+        competicaoEditando.setLimite(competicao.getLimite());
         servico.atualizar(competicaoEditando);
     }
 

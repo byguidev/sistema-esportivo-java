@@ -45,7 +45,6 @@ public class ResultadoService extends GenericServiceImpl<Resultado, Long> implem
 
     @Override
     public void validar(Resultado resultado) throws RegraDeNegocioException {
-        // precisa ter resultado e competição associada
         if (resultado == null || resultado.getCompeticao() == null) {
             throw new RegraDeNegocioException("É obrigatório selecionar uma competição.");
         }

@@ -60,14 +60,12 @@ public class CadastroInscricaoController {
 
     private void salvarInscricao() throws Exception {
         if (inscricaoEditando == null) {
-            // nova inscrição
             Inscricao novaInscricao = new Inscricao(comboBoxAtleta.getValue(),
                 comboBoxCompeticao.getValue());
             inscricaoService.salvar(novaInscricao);
             return;
         }
 
-        // atualizar existente
         inscricaoEditando.setAtleta(comboBoxAtleta.getValue());
         inscricaoEditando.setCompeticao(comboBoxCompeticao.getValue());
         inscricaoService.atualizar(inscricaoEditando);

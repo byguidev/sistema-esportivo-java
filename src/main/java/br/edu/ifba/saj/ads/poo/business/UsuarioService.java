@@ -39,7 +39,7 @@ public class UsuarioService extends GenericServiceImpl<Usuario, Long> implements
             throw new RegraDeNegocioException("Perfil do usuário é obrigatório.");
         }
 
-        // login precisa ser único; ignora o próprio usuário quando é uma edição
+        // login precisa ser único, mas ignora o próprio usuário numa edição
         boolean loginJaExiste = dao.buscarTodos().stream()
             .anyMatch(u -> !Objects.equals(u.getId(), usuario.getId())
                 && u.getLogin().equalsIgnoreCase(usuario.getLogin()));

@@ -22,17 +22,14 @@ public class CompeticaoService extends GenericServiceImpl<Competicao, Long> {
             throw new RegraDeNegocioException("Dados da competição são obrigatórios.");
         }
 
-        // validar nome
         if (competicao.getNome() == null || competicao.getNome().trim().isEmpty()) {
             throw new RegraDeNegocioException("Nome da competição é obrigatório.");
         }
 
-        // validar data
         if (competicao.getData() == null) {
             throw new RegraDeNegocioException("Data da competição é obrigatória.");
         }
 
-        // limite precisa ser positivo
         if (competicao.getLimite() <= 0) {
             throw new RegraDeNegocioException("Limite de participantes deve ser maior que 0.");
         }

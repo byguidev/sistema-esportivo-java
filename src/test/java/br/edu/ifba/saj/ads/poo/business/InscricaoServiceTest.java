@@ -69,10 +69,8 @@ class InscricaoServiceTest {
         Competicao competicao = criarCompeticao(2);
         Atleta atleta = criarAtleta("Daniel");
 
-        // primeira inscrição funciona
         inscricaoService.salvar(new Inscricao(atleta, competicao));
 
-        // segunda inscrição do mesmo atleta deve falhar
         RegraDeNegocioException exception = assertThrows(RegraDeNegocioException.class,
             () -> inscricaoService.salvar(new Inscricao(atleta, competicao)));
 
@@ -106,7 +104,6 @@ class InscricaoServiceTest {
         inscricaoService.salvar(new Inscricao(ana, corrida));
         inscricaoService.salvar(new Inscricao(bruno, natacao));
 
-        // verifica que só retorna inscrições da corrida
         assertEquals(1, inscricaoService.buscarPorCompeticao(corrida).size());
         assertEquals(ana, inscricaoService.buscarPorCompeticao(corrida).get(0).getAtleta());
     }

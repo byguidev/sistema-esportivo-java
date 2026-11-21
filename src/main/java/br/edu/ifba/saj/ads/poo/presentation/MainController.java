@@ -48,7 +48,7 @@ public class MainController {
     private static final String ESTILO_EXCLUIR = ESTILO_ACAO + " -fx-text-fill: #A34A4A;";
     private static final String COR_ICONE_EXCLUIR = "#A34A4A";
 
-    // ícone de lixeira (excluir) — vetor, não depende de fonte com emoji
+    // lixeira em vetor, não depende de fonte com emoji
     private static final String SVG_LIXEIRA = "M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12Z "
         + "M19 4h-3.5l-1-1h-5l-1 1H5v2h14V4Z";
 
@@ -112,7 +112,6 @@ public class MainController {
         tabelaResultado.setItems(listaResultados);
         tabelaUsuario.setItems(listaUsuarios);
 
-        // colunas simples
         colAtletaNome.setCellValueFactory(new PropertyValueFactory<>("nome"));
         colAtletaCategoria.setCellValueFactory(new PropertyValueFactory<>("categoria"));
 
@@ -199,11 +198,6 @@ public class MainController {
     // largura da coluna: conteúdo (2 botões de 32px + espaçamento de 6px = 70px) mais uma folga pequena
     private static final double LARGURA_COLUNA_ACOES = 78;
 
-    // o corpo das linhas da tabela renderiza ~9px deslocado pra direita em relação ao cabeçalho da
-    // coluna (o JavaFX reserva espaço pra uma scrollbar vertical no total das linhas, mas não no
-    // cabeçalho — então a largura total do corpo fica maior que a do cabeçalho). Sem essa correção,
-    // o conteúdo desta coluna, embora corretamente centralizado dentro da própria célula, aparece
-    // deslocado pra direita em relação ao título "AÇÕES" acima dela.
     private static final double CORRECAO_DESLOCAMENTO_LINHA = -9;
 
     private <S> void configurarColunaAcoes(TableColumn<S, Void> coluna, String entidade,
@@ -249,7 +243,6 @@ public class MainController {
         tabelaUsuario.refresh();
     }
 
-    // abre a janela de cadastro de competição como modal
     @FXML private void abrirCadastroCompeticao() throws Exception {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/br/edu/ifba/saj/ads/poo/presentation/view/CadastroCompeticao.fxml"));
         Parent root = loader.load();
@@ -260,7 +253,7 @@ public class MainController {
         abrirModal(root, "Cadastro de Competição");
     }
 
-    // abre a janela de cadastro de usuário como modal (só o botão do admin chama isso)
+    // só o admin chega aqui
     @FXML private void abrirCadastroUsuario() throws Exception {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/br/edu/ifba/saj/ads/poo/presentation/view/CadastroUsuario.fxml"));
         Parent root = loader.load();
@@ -271,7 +264,6 @@ public class MainController {
         abrirModal(root, "Cadastro de Usuário");
     }
 
-    // abre a tela de auditoria como modal
     @FXML private void abrirAuditoria() throws Exception {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/br/edu/ifba/saj/ads/poo/presentation/view/Auditoria.fxml"));
         Parent root = loader.load();
@@ -297,7 +289,6 @@ public class MainController {
         }
     }
 
-    // abre a janela de cadastro de atleta como modal
     @FXML private void abrirCadastroAtleta() throws Exception {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/br/edu/ifba/saj/ads/poo/presentation/view/CadastroAtleta.fxml"));
         Parent root = loader.load();
@@ -308,7 +299,6 @@ public class MainController {
         abrirModal(root, "Cadastro de Atleta");
     }
 
-    // abre a janela de inscrição de atleta em competição
     @FXML private void abrirCadastroInscricao() throws Exception {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/br/edu/ifba/saj/ads/poo/presentation/view/CadastroInscricao.fxml"));
         Parent root = loader.load();
@@ -321,7 +311,6 @@ public class MainController {
         abrirModal(root, "Inscrição de Atleta");
     }
 
-    // abre a janela de cadastro de resultado (pódio da competição)
     @FXML private void abrirCadastroResultado() throws Exception {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/br/edu/ifba/saj/ads/poo/presentation/view/CadastroResultado.fxml"));
         Parent root = loader.load();
@@ -334,7 +323,6 @@ public class MainController {
         abrirModal(root, "Cadastro de Resultado");
     }
 
-    // abre a tela de edição de atleta reaproveitando o controller de cadastro
     private void abrirEdicaoAtleta(Atleta atleta) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/br/edu/ifba/saj/ads/poo/presentation/view/CadastroAtleta.fxml"));
@@ -350,7 +338,6 @@ public class MainController {
         }
     }
 
-    // abre a tela de edição de competição
     private void abrirEdicaoCompeticao(Competicao competicao) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/br/edu/ifba/saj/ads/poo/presentation/view/CadastroCompeticao.fxml"));
@@ -366,7 +353,6 @@ public class MainController {
         }
     }
 
-    // abre a tela de edição de inscrição
     private void abrirEdicaoInscricao(Inscricao inscricao) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/br/edu/ifba/saj/ads/poo/presentation/view/CadastroInscricao.fxml"));
@@ -384,7 +370,6 @@ public class MainController {
         }
     }
 
-    // abre a tela de edição de resultado
     private void abrirEdicaoResultado(Resultado resultado) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/br/edu/ifba/saj/ads/poo/presentation/view/CadastroResultado.fxml"));
@@ -402,7 +387,6 @@ public class MainController {
         }
     }
 
-    // abre a tela de edição de usuário
     private void abrirEdicaoUsuario(Usuario usuario) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/br/edu/ifba/saj/ads/poo/presentation/view/CadastroUsuario.fxml"));
@@ -443,7 +427,6 @@ public class MainController {
         return resultado.isPresent() && resultado.get() == ButtonType.OK;
     }
 
-    // remove um atleta após confirmação, junto do que depende dele
     private void excluirAtleta(Atleta atleta) {
         if (!confirmarExclusao("Excluir atleta",
             "Excluir o atleta também remove suas inscrições e os resultados em que ele aparece. Continuar?")) {
@@ -458,7 +441,6 @@ public class MainController {
         }
     }
 
-    // remove uma competição após confirmação, junto do que depende dela
     private void excluirCompeticao(Competicao competicao) {
         if (!confirmarExclusao("Excluir competição",
             "Excluir a competição também remove suas inscrições e seu resultado. Continuar?")) {
@@ -473,7 +455,6 @@ public class MainController {
         }
     }
 
-    // remove uma inscrição após confirmação
     private void excluirInscricao(Inscricao inscricao) {
         if (!confirmarExclusao("Excluir inscrição", "Deseja excluir a inscrição selecionada?")) {
             return;
@@ -487,7 +468,6 @@ public class MainController {
         }
     }
 
-    // remove um resultado após confirmação
     private void excluirResultado(Resultado resultado) {
         if (!confirmarExclusao("Excluir resultado", "Deseja excluir o resultado selecionado?")) {
             return;
@@ -501,7 +481,6 @@ public class MainController {
         }
     }
 
-    // remove um usuário após confirmação
     private void excluirUsuario(Usuario usuario) {
         if (!confirmarExclusao("Excluir usuário", "Deseja excluir o usuário selecionado?")) {
             return;

@@ -14,7 +14,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
-// tela só de leitura (acesso restrito a ADMIN, controlado lá no MainController) com quem criou/alterou cada registro
+// tela só de leitura com quem criou e alterou cada registro, restrita ao admin
 public class AuditoriaController {
 
     private static final DateTimeFormatter FORMATO_DATA = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");

@@ -47,7 +47,6 @@ class CompeticaoServiceTest {
 
     @Test
     void deveFalharAoSalvarSemData() {
-        // sem data deve falhar
         Competicao competicao = new Competicao("Corrida", null, 20);
         RegraDeNegocioException exception = assertThrows(RegraDeNegocioException.class,
             () -> competicaoService.salvar(competicao));
@@ -69,7 +68,6 @@ class CompeticaoServiceTest {
         Competicao competicao = new Competicao("Corrida", LocalDate.now().plusDays(10), 20);
         competicaoService.salvar(competicao);
 
-        // aumenta o limite
         competicao.setLimite(30);
         competicaoService.atualizar(competicao);
 
@@ -95,6 +93,28 @@ class CompeticaoServiceTest {
             () -> competicaoService.atualizar(competicao));
 
         assertTrue(exception.getMessage().contains("Limite menor"));
+    }
+
+    @Test
+    void naoDevePersistirOLimiteRecusadoNaCompeticao() {
+        Competicao competicao = new Competicao("Corrida", LocalDate.now().plusDays(10), 5);
+        competicaoService.salvar(competicao);
+
+        Atleta ana = new Atleta("Ana", "Adulto");
+        Atleta bruno = new Atleta("Bruno", "Adulto");
+        atletaService.salvar(ana);
+        atletaService.salvar(bruno);
+
+        inscricaoService.salvar(new Inscricao(ana, competicao));
+        inscricaoService.salvar(new Inscricao(bruno, competicao));
+
+        // é o que a tela de edição faz: valida uma cópia com o mesmo id antes de
+        // aplicar os novos dados, então a competição salva não pode ser alterada
+        Competicao candidata = new Competicao("Corrida", competicao.getData(), 1);
+        candidata.setId(competicao.getId());
+
+        assertThrows(RegraDeNegocioException.class, () -> competicaoService.validar(candidata));
+        assertEquals(5, competicaoService.buscarPorId(competicao.getId()).getLimite());
     }
 
     @Test

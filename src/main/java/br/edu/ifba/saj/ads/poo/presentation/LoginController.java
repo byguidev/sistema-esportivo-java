@@ -23,7 +23,7 @@ public class LoginController {
     @FXML private TextField login;
     @FXML private PasswordField senha;
 
-    // confere usuário e senha; se bater, abre a tela principal no lugar da tela de login
+    // se usuário e senha baterem, abre a tela principal no lugar da tela de login
     @FXML private void onEntrar() {
         Usuario usuario = usuarioService.autenticar(login.getText(), senha.getText());
 

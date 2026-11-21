@@ -21,7 +21,6 @@ public class InscricaoService extends GenericServiceImpl<Inscricao, Long> implem
             return List.of();
         }
 
-        // filtra todas as inscrições para apenas as da competição especificada
         return dao.buscarTodos().stream()
             .filter(inscricao -> inscricao.getCompeticao().getId().equals(competicao.getId()))
             .toList();
@@ -50,7 +49,6 @@ public class InscricaoService extends GenericServiceImpl<Inscricao, Long> implem
 
     @Override
     public void validar(Inscricao inscricao) throws RegraDeNegocioException {
-        // verifica se tem todos os dados necessários
         if (inscricao == null || inscricao.getAtleta() == null || inscricao.getCompeticao() == null) {
             throw new RegraDeNegocioException("Sem dados válidos para inscrição.");
         }
@@ -61,12 +59,10 @@ public class InscricaoService extends GenericServiceImpl<Inscricao, Long> implem
             .filter(i -> !Objects.equals(i.getId(), inscricao.getId()))
             .toList();
 
-        // verifica se ainda há vagas
         if (outrasInscricoes.size() >= inscricao.getCompeticao().getLimite()) {
             throw new RegraDeNegocioException("Competição completa. Não é possível realizar novas inscrições.");
         }
 
-        // verifica se o atleta já está inscrito nesta competição
         boolean jaInscrito = outrasInscricoes.stream()
             .anyMatch(i -> i.getAtleta().getId().equals(inscricao.getAtleta().getId()));
 

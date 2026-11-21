@@ -21,7 +21,7 @@ public class SessaoUsuario {
         return usuarioLogado;
     }
 
-    // login usado pra carimbar quem criou/alterou um registro; "sistema" cobre o que acontece antes do login (o admin semente)
+    // "sistema" cobre o que roda antes do login, como a criação do admin inicial
     public static String getLoginAtual() {
         return usuarioLogado != null ? usuarioLogado.getLogin() : "sistema";
     }

@@ -1,6 +1,6 @@
 package br.edu.ifba.saj.ads.poo.presentation;
 
-// linha usada só pra exibir os dados de auditoria na tabela; não representa nada que é salvo no "banco"
+// linha usada só pra exibir a auditoria na tabela, não é nada que fica salvo no "banco"
 public class LinhaAuditoria {
     private final String tipo;
     private final String registro;

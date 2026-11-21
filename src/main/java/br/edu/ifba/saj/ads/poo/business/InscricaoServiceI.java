@@ -6,7 +6,6 @@ import br.edu.ifba.saj.ads.poo.model.Inscricao;
 
 import java.util.List;
 
-// interface específica para o serviço de inscrições
 public interface InscricaoServiceI extends GenericService<Inscricao, Long> {
 
     List<Inscricao> buscarPorCompeticao(Competicao competicao);

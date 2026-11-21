@@ -2,16 +2,12 @@ package br.edu.ifba.saj.ads.poo.model;
 
 import java.time.LocalDate;
 
-// classe que representa uma competição esportiva cadastrada no sistema
+// competição esportiva cadastrada no sistema
 public class Competicao extends AbstractModel<Long> {
-    // nome da competição
     private String nome;
-    // data em que a competição será realizada
     private LocalDate data;
-    // número máximo de atletas que podem se inscrever
     private int limiteParticipantes;
 
-    // cria uma nova competição e chama o construtor da superclasse
     public Competicao(String nome, LocalDate data, int limiteParticipantes) {
         super();
         this.nome = nome;
@@ -19,37 +15,32 @@ public class Competicao extends AbstractModel<Long> {
         this.limiteParticipantes = limiteParticipantes;
     }
 
-    // retorna o nome da competição
     public String getNome() {
         return nome;
     }
 
-    // atualiza o nome da competição
     public void setNome(String nome) {
         this.nome = nome;
     }
 
-    // retorna a data da competição
     public LocalDate getData() {
         return data;
     }
 
-    // atualiza a data da competição
     public void setData(LocalDate data) {
         this.data = data;
     }
 
-    // retorna o limite de participantes (atalho para limiteParticipantes)
+    // nome curto porque é lido em toda validação de vaga
     public int getLimite() {
         return limiteParticipantes;
     }
 
-    // atualiza o limite de participantes
     public void setLimite(int limiteParticipantes) {
         this.limiteParticipantes = limiteParticipantes;
     }
 
-    // representação textual da competição usada em combos e tabelas
+    // é o toString que o JavaFX usa para renderizar a competição em tabelas e combos
     @Override
     public String toString() {
         return this.getNome();

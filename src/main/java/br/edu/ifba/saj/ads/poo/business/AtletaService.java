@@ -18,17 +18,14 @@ public class AtletaService extends GenericServiceImpl<Atleta, Long> {
 
     @Override
     public void validar(Atleta atleta) throws RegraDeNegocioException {
-        // verifica se o atleta não é null
         if (atleta == null) {
             throw new RegraDeNegocioException("Dados do atleta são obrigatórios.");
         }
 
-        // nome não pode ser vazio
         if (atleta.getNome() == null || atleta.getNome().trim().isEmpty()) {
             throw new RegraDeNegocioException("Nome do atleta é obrigatório.");
         }
 
-        // categoria também é obrigatória
         if (atleta.getCategoria() == null || atleta.getCategoria().trim().isEmpty()) {
             throw new RegraDeNegocioException("Categoria do atleta é obrigatória.");
         }

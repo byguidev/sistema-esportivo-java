@@ -42,13 +42,11 @@ public class CadastroUsuarioController {
 
     private void salvarUsuario() throws Exception {
         if (usuarioEditando == null) {
-            // novo cadastro
             Usuario novoUsuario = new Usuario(login.getText(), senha.getText(), comboBoxPerfil.getValue());
             servico.salvar(novoUsuario);
             return;
         }
 
-        // atualizar existente
         usuarioEditando.setLogin(login.getText());
         usuarioEditando.setSenha(senha.getText());
         usuarioEditando.setPerfil(comboBoxPerfil.getValue());

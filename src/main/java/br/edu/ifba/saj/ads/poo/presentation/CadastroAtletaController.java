@@ -32,13 +32,11 @@ public class CadastroAtletaController {
 
     public void salvarAtleta() throws Exception {
         if (atletaEditando == null) {
-            // novo cadastro
             Atleta novoAtleta = new Atleta(nome.getText(), categoria.getText());
             servico.salvar(novoAtleta);
             return;
         }
 
-        // atualizar existente
         atletaEditando.setNome(nome.getText());
         atletaEditando.setCategoria(categoria.getText());
         servico.atualizar(atletaEditando);

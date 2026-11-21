@@ -42,7 +42,7 @@ public class FabricaDeServicos {
         return instancia;
     }
 
-    // o "banco" é em memória e some ao fechar o app, então sem isso nunca ia existir um admin pra logar
+    // sem isso não existiria nenhum admin pra fazer o primeiro login
     private void criarUsuarioAdminPadrao() {
         if (usuarioService.buscarTodos().isEmpty()) {
             usuarioService.salvar(new Usuario("admin", "admin", Perfil.ADMIN));

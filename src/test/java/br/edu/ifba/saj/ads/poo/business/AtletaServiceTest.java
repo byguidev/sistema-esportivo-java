@@ -38,7 +38,6 @@ class AtletaServiceTest {
 
     @Test
     void deveFalharAoSalvarSemNome() {
-        // testa quando nome é vazio
         Atleta atleta = new Atleta(" ", "Adulto");
         RegraDeNegocioException exception = assertThrows(RegraDeNegocioException.class,
             () -> atletaService.salvar(atleta));
@@ -60,7 +59,6 @@ class AtletaServiceTest {
         Atleta atleta = new Atleta("Ana", "Adulto");
         atletaService.salvar(atleta);
 
-        // atualiza o nome
         atleta.setNome("Ana Paula");
         atletaService.atualizar(atleta);
 

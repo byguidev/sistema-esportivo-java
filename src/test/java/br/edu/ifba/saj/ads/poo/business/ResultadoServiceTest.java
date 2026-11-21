@@ -46,7 +46,6 @@ class ResultadoServiceTest {
         Atleta segundo = criarAtleta("Bruno");
         Atleta terceiro = criarAtleta("Carla");
 
-        // salva resultado com top 3
         resultadoService.salvar(new Resultado(competicao, primeiro, segundo, terceiro));
         assertEquals(1, resultadoService.buscarTodos().size());
     }
@@ -57,7 +56,6 @@ class ResultadoServiceTest {
         Atleta segundo = criarAtleta("Bruno");
         Atleta terceiro = criarAtleta("Carla");
 
-        // resultado sem competição deve falhar
         RegraDeNegocioException exception = assertThrows(RegraDeNegocioException.class,
             () -> resultadoService.salvar(new Resultado(null, primeiro, segundo, terceiro)));
 
@@ -73,7 +71,6 @@ class ResultadoServiceTest {
 
         resultadoService.salvar(new Resultado(competicao, primeiro, segundo, terceiro));
 
-        // tentar salvar resultado novamente para mesma competição deve falhar
         RegraDeNegocioException exception = assertThrows(RegraDeNegocioException.class,
             () -> resultadoService.salvar(new Resultado(competicao, terceiro, segundo, primeiro)));
 
